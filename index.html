@@ -4,115 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy-First GIF Maker</title>
-    <!-- Tailwind CSS for clean, modern styling -->
-    <script src="https://jsdelivr.net"></script>
-    <!-- Gifshot library for client-side GIF generation -->
-    <script src="https://cloudflare.com"></script>
+    <!-- Links to your separate style sheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Pulls the external GIF processing engine safely -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col items-center justify-center p-6">
+<body>
 
-    <div class="max-w-md w-full bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-        <h1 class="text-2xl font-bold text-center mb-2 text-indigo-400">Offline GIF Maker</h1>
-        <p class="text-sm text-gray-400 text-center mb-6">100% private. No logs. No server uploads.</p>
+    <div class="card">
+        <h1>Offline GIF Maker</h1>
+        <p class="subtitle">100% private. No logs. No server uploads.</p>
 
-        <!-- Image Input -->
-        <div class="mb-6">
-            <label class="block text-sm font-medium mb-2 text-gray-300">Select Images (PNG, JPG):</label>
-            <input type="file" id="imageInput" multiple accept="image/*" 
-                   class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer">
+        <!-- Image Input Selection -->
+        <div class="input-group">
+            <label>Select Images (PNG, JPG):</label>
+            <input type="file" id="imageInput" multiple accept="image/*">
         </div>
 
-        <!-- Frame Delay Slider -->
-        <div class="mb-6">
-            <div class="flex justify-between text-sm font-medium mb-2">
-                <label class="text-gray-300">Frame Delay (Speed):</label>
-                <span id="delayVal" class="text-indigo-400">0.2s</span>
+        <!-- Speed Controls -->
+        <div class="input-group">
+            <div class="slider-header">
+                <label>Frame Delay (Speed):</label>
+                <span id="delayVal">0.2s</span>
             </div>
-            <input type="range" id="delayInput" min="0.05" max="1" step="0.05" value="0.2" 
-                   class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+            <input type="range" id="delayInput" min="0.05" max="1" step="0.05" value="0.2">
         </div>
 
-        <!-- Action Buttons -->
-        <button id="generateBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-4 rounded-lg transition-colors mb-6 cursor-pointer disabled:opacity-50" disabled>
-            Generate GIF
-        </button>
+        <!-- Trigger Button -->
+        <button id="generateBtn" disabled>Generate GIF</button>
 
-        <!-- Output / Preview Area -->
-        <div id="previewContainer" class="hidden border border-gray-700 rounded-xl p-4 bg-gray-900 flex flex-col items-center">
-            <h2 class="text-sm font-semibold mb-3 text-gray-400">Preview (Press & hold to save if button fails)</h2>
-            <img id="gifPreview" class="max-w-full h-auto rounded-lg mb-4 shadow" alt="Your animated GIF">
-            <a id="downloadBtn" class="w-full text-center bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer">
-                Download GIF File
-            </a>
+        <!-- Hidden Output Preview Area -->
+        <div id="previewContainer" class="hidden">
+            <h2 class="preview-title">Preview (Press & hold to save if button fails)</h2>
+            <img id="gifPreview" alt="Your animated GIF">
+            <a id="downloadBtn">Download GIF File</a>
         </div>
     </div>
 
-    <script>
-        const imageInput = document.getElementById('imageInput');
-        const delayInput = document.getElementById('delayInput');
-        const delayVal = document.getElementById('delayVal');
-        const generateBtn = document.getElementById('generateBtn');
-        const previewContainer = document.getElementById('previewContainer');
-        const gifPreview = document.getElementById('gifPreview');
-        const downloadBtn = document.getElementById('downloadBtn');
-
-        let imageFiles = [];
-
-        // Update delay slider label text dynamically
-        delayInput.addEventListener('input', (e) => {
-            delayVal.textContent = `${e.target.value}s`;
-        });
-
-        // Enable button only when files are selected
-        imageInput.addEventListener('change', (e) => {
-            imageFiles = Array.from(e.target.files);
-            generateBtn.disabled = imageFiles.length === 0;
-        });
-
-        generateBtn.addEventListener('click', () => {
-            if (imageFiles.length === 0) return;
-            
-            generateBtn.textContent = 'Processing...';
-            generateBtn.disabled = true;
-
-            // Convert file uploads to data URLs for the gifshot library
-            const filePromises = imageFiles.map(file => {
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.readAsDataURL(file);
-                });
-            });
-
-            Promise.all(filePromises).then(imageUrls => {
-                // Configure gifshot settings
-                gifshot.createGIF({
-                    images: imageUrls,
-                    interval: parseFloat(delayInput.value), // speed per frame
-                    numWorkers: 2,
-                    gifWidth: 400,
-                    gifHeight: 400
-                }, function (obj) {
-                    if (!obj.error) {
-                        const imageSrc = obj.image;
-                        
-                        // Set image preview
-                        gifPreview.src = imageSrc;
-                        
-                        // Set up direct download button link
-                        downloadBtn.href = imageSrc;
-                        downloadBtn.download = `custom-whatsapp-${Date.now()}.gif`;
-                        
-                        // Reveal the hidden layout section
-                        previewContainer.classList.remove('hidden');
-                    } else {
-                        alert('Something went wrong generating your GIF. Try using fewer images.');
-                    }
-                    generateBtn.textContent = 'Generate GIF';
-                    generateBtn.disabled = false;
-                });
-            });
-        });
-    </script>
+    <!-- Links to your separate logic script -->
+    <script src="app.js"></script>
 </body>
 </html>
